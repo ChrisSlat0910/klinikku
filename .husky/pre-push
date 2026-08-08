@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Running pre-push checks..."
+
+echo "Running full Pest test suite..."
+cd apps/api && ./vendor/bin/pest
+if [ $? -ne 0 ]; then
+  echo "Pest tests failed. Fix failing tests before pushing."
+  exit 1
+fi
+cd ../..
+
+echo "Pre-push checks passed."
