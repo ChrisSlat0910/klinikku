@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # ── BACKEND ───────────────────────────────────────────────────────────────
+  backend:
+    name: Backend (Laravel)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:9.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: klinikku_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+      redis:
+        image: redis:8.10-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: mbstring, pdo, pdo_mysql, redis, gd
+          coverage: xdebug
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: apps/api/vendor
+          key: composer-${{ hashFiles('apps/api/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install Composer dependencies
+        working-directory: apps/api
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Copy .env
+        working-directory: apps/api
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Configure test environment
+        working-directory: apps/api
+        run: |
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_DATABASE=klinikku/DB_DATABASE=klinikku_test/' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=root/DB_PASSWORD=root/' .env
+          sed -i 's/CACHE_STORE=redis/CACHE_STORE=array/' .env
+          sed -i 's/SESSION_DRIVER=redis/SESSION_DRIVER=array/' .env
+          sed -i 's/QUEUE_CONNECTION=redis/QUEUE_CONNECTION=sync/' .env
+
+      - name: Run Laravel Pint
+        working-directory: apps/api
+        run: ./vendor/bin/pint --test
+
+      - name: Run PHPStan
+        working-directory: apps/api
+        run: ./vendor/bin/phpstan analyse --no-progress
+
+      - name: Run Pest tests
+        working-directory: apps/api
+        run: ./vendor/bin/pest --coverage --min=70
+
+  # ── FRONTEND WEB ──────────────────────────────────────────────────────────
+  frontend-web:
+    name: Frontend Web (Nuxt 4)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: apps/web
+        run: npm run lint
+
+      - name: Run TypeScript check
+        working-directory: apps/web
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: apps/web
+        run: npm run build
+
+  # ── MOBILE ────────────────────────────────────────────────────────────────
+  mobile:
+    name: Mobile (Expo SDK 57)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/mobile
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: apps/mobile
+        run: npm run lint
+
+      - name: Run TypeScript check
+        working-directory: apps/mobile
+        run: npm run typecheck
