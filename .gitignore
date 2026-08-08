@@ -1,0 +1,41 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Laravel
+apps/api/.env
+apps/api/vendor/
+apps/api/storage/logs/
+apps/api/storage/framework/cache/
+apps/api/storage/framework/sessions/
+apps/api/storage/framework/views/
+apps/api/bootstrap/cache/
+
+# Nuxt
+apps/web/.env
+apps/web/node_modules/
+apps/web/.nuxt/
+apps/web/.output/
+apps/web/dist/
+
+# Expo
+apps/mobile/.env
+apps/mobile/node_modules/
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/android/
+apps/mobile/ios/
+
+# Shared
+packages/shared/node_modules/
+packages/shared/dist/
+
+# Docker
+*.log
+docker-compose.override.yml
