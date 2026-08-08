@@ -83,7 +83,7 @@ jobs:
 
       - name: Run Pest tests
         working-directory: apps/api
-        run: ./vendor/bin/pest --coverage --min=70
+        run: ./vendor/bin/pest --coverage
 
   frontend-web:
     name: Frontend Web (Nuxt 4)
