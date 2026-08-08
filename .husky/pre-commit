@@ -1,0 +1,37 @@
+#!/bin/sh
+
+echo "Running pre-commit checks..."
+
+echo "[1/4] Laravel Pint..."
+cd apps/api && ./vendor/bin/pint --test
+if [ $? -ne 0 ]; then
+  echo "Pint failed. Run ./vendor/bin/pint to fix."
+  exit 1
+fi
+cd ../..
+
+echo "[2/4] PHPStan..."
+cd apps/api && ./vendor/bin/phpstan analyse --no-progress
+if [ $? -ne 0 ]; then
+  echo "PHPStan failed. Fix type errors before committing."
+  exit 1
+fi
+cd ../..
+
+echo "[3/4] ESLint (web)..."
+cd apps/web && npm run lint
+if [ $? -ne 0 ]; then
+  echo "ESLint web failed. Run npm run lint:fix to fix."
+  exit 1
+fi
+cd ../..
+
+echo "[4/4] ESLint (mobile)..."
+cd apps/mobile && npm run lint
+if [ $? -ne 0 ]; then
+  echo "ESLint mobile failed. Run npm run lint:fix to fix."
+  exit 1
+fi
+cd ../..
+
+echo "All pre-commit checks passed."
