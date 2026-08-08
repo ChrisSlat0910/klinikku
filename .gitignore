@@ -39,4 +39,3 @@ packages/shared/dist/
 # Docker
 *.log
 docker-compose.override.yml
-node_modules/
