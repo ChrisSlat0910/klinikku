@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Icd10Controller;
@@ -41,7 +42,7 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
         Route::post('/{id}/vital-signs', [QueueController::class, 'vitalSigns']);
     });
 
-    // RME — specific routes before wildcard
+    // RME
     Route::prefix('rme')->group(function (): void {
         Route::post('/', [RmeController::class, 'store']);
         Route::get('/patient/{patientId}', [RmeController::class, 'index']);
@@ -50,6 +51,14 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
 
     // ICD-10 search
     Route::get('/icd10/search', [Icd10Controller::class, 'search']);
+
+    // Appointments
+    Route::prefix('appointments')->middleware('feature:queue_appointment')->group(function (): void {
+        Route::get('/slots', [AppointmentController::class, 'slots']);
+        Route::get('/', [AppointmentController::class, 'index']);
+        Route::post('/', [AppointmentController::class, 'store']);
+        Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel']);
+    });
 });
 
 // Public routes (no auth)
