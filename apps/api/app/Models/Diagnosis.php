@@ -1,0 +1,15 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Diagnosis extends Model
+{
+    protected $fillable = [
+        'code',
+        'name_id',
+        'name_en',
+        'category',
+    ];
+}
