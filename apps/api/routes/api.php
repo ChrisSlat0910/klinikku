@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\Icd10Controller;
 use App\Http\Controllers\Api\V1\PatientAuthController;
 use App\Http\Controllers\Api\V1\PublicQueueController;
 use App\Http\Controllers\Api\V1\QueueController;
+use App\Http\Controllers\Api\V1\RmeController;
 use Illuminate\Support\Facades\Route;
 
 // Health check
@@ -38,6 +40,16 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
         Route::patch('/{id}/transfer', [QueueController::class, 'transfer']);
         Route::post('/{id}/vital-signs', [QueueController::class, 'vitalSigns']);
     });
+
+    // RME — specific routes before wildcard
+    Route::prefix('rme')->group(function (): void {
+        Route::post('/', [RmeController::class, 'store']);
+        Route::get('/patient/{patientId}', [RmeController::class, 'index']);
+        Route::get('/{id}', [RmeController::class, 'show']);
+    });
+
+    // ICD-10 search
+    Route::get('/icd10/search', [Icd10Controller::class, 'search']);
 });
 
 // Public routes (no auth)
