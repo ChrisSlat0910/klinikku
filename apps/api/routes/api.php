@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Icd10Controller;
 use App\Http\Controllers\Api\V1\PatientAuthController;
+use App\Http\Controllers\Api\V1\PharmacyController;
 use App\Http\Controllers\Api\V1\PublicQueueController;
 use App\Http\Controllers\Api\V1\PublicRujukanController;
 use App\Http\Controllers\Api\V1\QueueController;
@@ -66,6 +68,23 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
     Route::prefix('referral')->group(function (): void {
         Route::get('/', [RujukanController::class, 'index']);
         Route::post('/', [RujukanController::class, 'store']);
+    });
+
+    // Pharmacy
+    Route::prefix('pharmacy')->group(function (): void {
+        Route::get('/prescriptions', [PharmacyController::class, 'prescriptions']);
+        Route::patch('/prescriptions/{id}/dispense', [PharmacyController::class, 'dispense']);
+        Route::get('/drugs', [PharmacyController::class, 'drugs']);
+        Route::post('/drugs', [PharmacyController::class, 'createDrug']);
+        Route::patch('/drugs/{id}/stock', [PharmacyController::class, 'adjustStock']);
+    });
+
+    // Billing
+    Route::prefix('billing')->group(function (): void {
+        Route::get('/pending', [BillingController::class, 'pending']);
+        Route::get('/history', [BillingController::class, 'history']);
+        Route::get('/{queueItemId}', [BillingController::class, 'show']);
+        Route::post('/{queueItemId}/pay', [BillingController::class, 'pay']);
     });
 });
 

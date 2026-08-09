@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasClinicScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class QueueItem extends Model
 {
@@ -50,5 +51,17 @@ class QueueItem extends Model
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    /** @return HasOne<Invoice> */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    /** @return HasOne<MedicalRecord> */
+    public function medicalRecord(): HasOne
+    {
+        return $this->hasOne(MedicalRecord::class);
     }
 }
