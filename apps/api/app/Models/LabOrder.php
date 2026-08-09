@@ -5,9 +5,9 @@ namespace App\Models;
 use App\Traits\HasClinicScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Prescription extends Model
+class LabOrder extends Model
 {
     use HasClinicScope;
 
@@ -16,43 +16,36 @@ class Prescription extends Model
         'medical_record_id',
         'patient_id',
         'doctor_id',
-        'dispensed_by',
+        'tests_requested',
         'status',
-        'notes',
-        'dispensed_at',
+        'clinical_notes',
     ];
 
     protected $casts = [
-        'dispensed_at' => 'datetime',
+        'tests_requested' => 'array',
     ];
 
-    /** @return BelongsTo<Clinic, Prescription> */
+    /** @return BelongsTo<Clinic, LabOrder> */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /** @return BelongsTo<MedicalRecord, Prescription> */
-    public function medicalRecord(): BelongsTo
-    {
-        return $this->belongsTo(MedicalRecord::class);
-    }
-
-    /** @return BelongsTo<Patient, Prescription> */
+    /** @return BelongsTo<Patient, LabOrder> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);
     }
 
-    /** @return BelongsTo<User, Prescription> */
+    /** @return BelongsTo<User, LabOrder> */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
-    /** @return HasMany<PrescriptionItem> */
-    public function items(): HasMany
+    /** @return HasOne<LabResult> */
+    public function result(): HasOne
     {
-        return $this->hasMany(PrescriptionItem::class);
+        return $this->hasOne(LabResult::class);
     }
 }

@@ -6,7 +6,7 @@ use App\Traits\HasClinicScope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class QueueItem extends Model
+class Appointment extends Model
 {
     use HasClinicScope;
 
@@ -14,39 +14,31 @@ class QueueItem extends Model
         'clinic_id',
         'doctor_id',
         'patient_id',
-        'queue_number',
-        'token',
-        'position',
+        'queue_item_id',
+        'scheduled_at',
+        'duration_minutes',
         'status',
-        'patient_name',
-        'patient_phone',
-        'chief_complaint',
-        'vital_signs',
-        'called_at',
-        'completed_at',
-        'queue_date',
+        'notes',
+        'cancellation_reason',
     ];
 
     protected $casts = [
-        'vital_signs' => 'array',
-        'called_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'queue_date' => 'date',
+        'scheduled_at' => 'datetime',
     ];
 
-    /** @return BelongsTo<Clinic, QueueItem> */
+    /** @return BelongsTo<Clinic, Appointment> */
     public function clinic(): BelongsTo
     {
         return $this->belongsTo(Clinic::class);
     }
 
-    /** @return BelongsTo<User, QueueItem> */
+    /** @return BelongsTo<User, Appointment> */
     public function doctor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'doctor_id');
     }
 
-    /** @return BelongsTo<Patient, QueueItem> */
+    /** @return BelongsTo<Patient, Appointment> */
     public function patient(): BelongsTo
     {
         return $this->belongsTo(Patient::class);

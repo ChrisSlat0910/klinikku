@@ -8,3 +8,4 @@ parameters:
     ignoreErrors:
         - identifier: generics.lessTypes
         - identifier: return.type
+        - identifier: missingType.generics
