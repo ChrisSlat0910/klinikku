@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BillingController;
+use App\Http\Controllers\Api\V1\DisplayController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Icd10Controller;
 use App\Http\Controllers\Api\V1\LabController;
@@ -14,7 +15,9 @@ use App\Http\Controllers\Api\V1\PublicRujukanController;
 use App\Http\Controllers\Api\V1\QueueController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RmeController;
+use App\Http\Controllers\Api\V1\RoleController;
 use App\Http\Controllers\Api\V1\RujukanController;
+use App\Http\Controllers\Api\V1\StaffController;
 use Illuminate\Support\Facades\Route;
 
 // Health check
@@ -106,10 +109,31 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
 
     // AI assistant
     Route::post('/ai/generate', [AiController::class, 'generate']);
+
+    // Staff management
+    Route::prefix('staff')->group(function (): void {
+        Route::get('/', [StaffController::class, 'index']);
+        Route::post('/', [StaffController::class, 'store']);
+        Route::get('/{id}', [StaffController::class, 'show']);
+        Route::patch('/{id}', [StaffController::class, 'update']);
+        Route::delete('/{id}', [StaffController::class, 'destroy']);
+    });
+
+    // Roles and permissions
+    Route::prefix('roles')->group(function (): void {
+        Route::get('/', [RoleController::class, 'index']);
+        Route::post('/', [RoleController::class, 'store']);
+        Route::patch('/{id}', [RoleController::class, 'update']);
+        Route::delete('/{id}', [RoleController::class, 'destroy']);
+        Route::post('/assign/{userId}', [RoleController::class, 'assign']);
+    });
+
+    Route::get('/permissions', [RoleController::class, 'permissions']);
 });
 
 // Public routes (no auth)
 Route::prefix('public')->group(function (): void {
     Route::get('/queue/{token}', [PublicQueueController::class, 'track']);
     Route::get('/referral/verify/{code}', [PublicRujukanController::class, 'verify']);
+    Route::get('/display/{clinicId}/{doctorId}', [DisplayController::class, 'show']);
 });
