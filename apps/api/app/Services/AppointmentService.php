@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendAppointmentReminderJob;
 use App\Models\Appointment;
 use Carbon\Carbon;
 
@@ -15,7 +16,7 @@ class AppointmentService
         $slots = [];
         $startHour = 8;
         $endHour = 17;
-        $slotDuration = 15; // minutes
+        $slotDuration = 15;
 
         $bookedSlots = Appointment::where('clinic_id', $clinicId)
             ->where('doctor_id', $doctorId)
@@ -66,12 +67,21 @@ class AppointmentService
         $appointment = Appointment::create([
             'clinic_id' => $clinicId,
             'doctor_id' => $data['doctor_id'],
-            'patient_id' => $data['patient_id'],
+            'patient_id' => $data['patient_id'] ?? null,
             'scheduled_at' => $data['scheduled_at'],
             'duration_minutes' => $data['duration_minutes'] ?? 15,
             'notes' => $data['notes'] ?? null,
             'status' => 'confirmed',
         ]);
+
+        // Schedule H-1 reminder job
+        $scheduledAt = Carbon::parse($data['scheduled_at']);
+        $reminderAt = $scheduledAt->copy()->subDay();
+
+        if ($reminderAt->isFuture()) {
+            SendAppointmentReminderJob::dispatch($appointment->id)
+                ->delay($reminderAt);
+        }
 
         return $appointment->load(['patient', 'doctor']);
     }
