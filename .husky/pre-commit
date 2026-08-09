@@ -11,7 +11,7 @@ fi
 cd ../..
 
 echo "[2/4] PHPStan..."
-cd apps/api && ./vendor/bin/phpstan analyse --no-progress
+cd apps/api && ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 if [ $? -ne 0 ]; then
   echo "PHPStan failed. Fix type errors before committing."
   exit 1
