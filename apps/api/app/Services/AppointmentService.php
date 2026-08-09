@@ -8,6 +8,8 @@ use Carbon\Carbon;
 
 class AppointmentService
 {
+    public function __construct(private NotificationService $notificationService) {}
+
     /**
      * @return array<int, array<string, mixed>>
      */
@@ -74,8 +76,28 @@ class AppointmentService
             'status' => 'confirmed',
         ]);
 
+        $appointment->load(['patient', 'doctor']);
+
+        // Send WA confirmation
+        $patient = $appointment->patient;
+        $doctor = $appointment->doctor;
+        $scheduledAt = Carbon::parse($appointment->scheduled_at);
+
+        if ($patient !== null && $doctor !== null) {
+            $message = "Janji temu Anda telah dikonfirmasi!\n"
+                ."Dokter: {$doctor->name}\n"
+                ."Tanggal: {$scheduledAt->format('d M Y H:i')}\n"
+                .'Harap datang 10 menit lebih awal.';
+
+            $this->notificationService->sendWa(
+                $clinicId,
+                $patient->phone,
+                'appointment_confirmed',
+                $message
+            );
+        }
+
         // Schedule H-1 reminder job
-        $scheduledAt = Carbon::parse($data['scheduled_at']);
         $reminderAt = $scheduledAt->copy()->subDay();
 
         if ($reminderAt->isFuture()) {
@@ -83,6 +105,6 @@ class AppointmentService
                 ->delay($reminderAt);
         }
 
-        return $appointment->load(['patient', 'doctor']);
+        return $appointment;
     }
 }
