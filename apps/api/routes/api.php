@@ -6,8 +6,10 @@ use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Icd10Controller;
 use App\Http\Controllers\Api\V1\PatientAuthController;
 use App\Http\Controllers\Api\V1\PublicQueueController;
+use App\Http\Controllers\Api\V1\PublicRujukanController;
 use App\Http\Controllers\Api\V1\QueueController;
 use App\Http\Controllers\Api\V1\RmeController;
+use App\Http\Controllers\Api\V1\RujukanController;
 use Illuminate\Support\Facades\Route;
 
 // Health check
@@ -59,9 +61,16 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
         Route::post('/', [AppointmentController::class, 'store']);
         Route::patch('/{id}/cancel', [AppointmentController::class, 'cancel']);
     });
+
+    // Rujukan digital
+    Route::prefix('referral')->group(function (): void {
+        Route::get('/', [RujukanController::class, 'index']);
+        Route::post('/', [RujukanController::class, 'store']);
+    });
 });
 
 // Public routes (no auth)
 Route::prefix('public')->group(function (): void {
     Route::get('/queue/{token}', [PublicQueueController::class, 'track']);
+    Route::get('/referral/verify/{code}', [PublicRujukanController::class, 'verify']);
 });
