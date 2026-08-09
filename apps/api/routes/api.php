@@ -1,15 +1,18 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AiController;
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BillingController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\Icd10Controller;
+use App\Http\Controllers\Api\V1\LabController;
 use App\Http\Controllers\Api\V1\PatientAuthController;
 use App\Http\Controllers\Api\V1\PharmacyController;
 use App\Http\Controllers\Api\V1\PublicQueueController;
 use App\Http\Controllers\Api\V1\PublicRujukanController;
 use App\Http\Controllers\Api\V1\QueueController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RmeController;
 use App\Http\Controllers\Api\V1\RujukanController;
 use Illuminate\Support\Facades\Route;
@@ -86,6 +89,23 @@ Route::prefix('v1')->middleware(['api', 'auth:sanctum', 'clinic'])->group(functi
         Route::get('/{queueItemId}', [BillingController::class, 'show']);
         Route::post('/{queueItemId}/pay', [BillingController::class, 'pay']);
     });
+
+    // Lab
+    Route::prefix('lab')->middleware('feature:lab')->group(function (): void {
+        Route::get('/orders', [LabController::class, 'index']);
+        Route::post('/orders', [LabController::class, 'store']);
+        Route::post('/orders/{id}/results', [LabController::class, 'submitResult']);
+    });
+
+    // Reports
+    Route::prefix('reports')->group(function (): void {
+        Route::get('/daily', [ReportController::class, 'daily']);
+        Route::get('/bpjs', [ReportController::class, 'bpjs'])->middleware('feature:bpjs_reporting');
+        Route::get('/export', [ReportController::class, 'export']);
+    });
+
+    // AI assistant
+    Route::post('/ai/generate', [AiController::class, 'generate']);
 });
 
 // Public routes (no auth)
